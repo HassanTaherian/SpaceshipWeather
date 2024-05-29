@@ -1,13 +1,33 @@
 using Microsoft.AspNetCore.Mvc;
+using SpaceshipWeather.Models.Entities;
+using SpaceshipWeather.Services;
 
 namespace SpaceshipWeather.Controllers;
 [ApiController]
 [Route("[controller]")]
 public class WeatherForecastController : ControllerBase
 {
-    [HttpGet(Name = "test")]
-    public IEnumerable<string> GetTest()
+    private readonly ForecastService _forecastService;
+
+    public WeatherForecastController(ForecastService forecastService)
     {
-        return Enumerable.Empty<string>();
+        _forecastService = forecastService;
     }
+
+    [HttpGet("forcasts")]
+    public async Task<IActionResult> GetWeatherForcasts()
+    {
+        WeatherForcast? forcastDto = await _forecastService.GetForcast();
+
+        if (forcastDto is null)
+        {
+            return GetInternalErrorResult();
+        }
+
+        return Ok(forcastDto);
+    }
+
+    private ObjectResult GetInternalErrorResult() => StatusCode(500, new
+    { Message = "Something went Wrong! Please refer to logs." });
+
 }

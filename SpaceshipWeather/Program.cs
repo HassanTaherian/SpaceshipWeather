@@ -1,3 +1,6 @@
+using SpaceshipWeather.Models;
+using SpaceshipWeather.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -7,7 +10,14 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-Console.WriteLine(builder.Configuration.GetSection("Logging:LogLevel")["Default"]);
+// Register Services
+builder.Services.AddScoped<ForecastService>();
+builder.Services.AddSingleton<WeatherForcastMapper>();
+
+builder.Services.AddHttpClient<ForecastService>(client =>
+{
+    client.BaseAddress = new("https://api.open-meteo.com/v1/");
+});
 
 var app = builder.Build();
 
