@@ -16,7 +16,7 @@ builder.Services.AddSingleton<WeatherForcastMapper>();
 
 builder.Services.AddHttpClient<ForecastService>(client =>
 {
-    client.BaseAddress = new("https://api.open-meteo.com/v1/");
+    client.BaseAddress = new Uri(ApplicationSettings.BaseAddress);
 });
 
 var app = builder.Build();

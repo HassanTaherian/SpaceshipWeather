@@ -44,7 +44,7 @@ public class ForecastService
 
     private async Task<WeatherForcastDto> FetchForcastsFromExtrnalServiceWithTimeout()
     {
-        using var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        using var cancellationTokenSource = new CancellationTokenSource(ApplicationSettings.DefaultTimeout);
 
         const string forecastRoute = "forecast?latitude=52.52&longitude=13.41&hourly=temperature_2m,relativehumidity_2m,windspeed_10m";
 
