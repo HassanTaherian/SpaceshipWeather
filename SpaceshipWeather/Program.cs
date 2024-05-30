@@ -1,3 +1,4 @@
+using SpaceshipWeather;
 using SpaceshipWeather.Models;
 using SpaceshipWeather.Services;
 
@@ -13,6 +14,7 @@ builder.Services.AddSwaggerGen();
 // Register Services
 builder.Services.AddScoped<ForecastService>();
 builder.Services.AddSingleton<WeatherForcastMapper>();
+builder.Services.AddSingleton<DatabaseInitilizer>();
 
 builder.Services.AddHttpClient<ForecastService>(client =>
 {
@@ -33,5 +35,7 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+await app.Services.GetRequiredService<DatabaseInitilizer>().SetupTables();
 
 app.Run();
