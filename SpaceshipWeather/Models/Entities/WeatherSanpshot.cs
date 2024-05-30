@@ -2,6 +2,8 @@
 
 public class WeatherSanpshot
 {
+    public long WeatherForecastId { get; set; }
+
     public DateTime TimeStamp { get; set; }
 
     public decimal Temperature { get; set; }

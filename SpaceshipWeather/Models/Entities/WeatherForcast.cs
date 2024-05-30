@@ -10,6 +10,6 @@ public class WeatherForcast
 
     public required Metrics Metrics { get; set; }
 
-    public required List<WeatherSanpshot> Snapshots { get; set; }
+    public required IEnumerable<WeatherSanpshot> Snapshots { get; set; }
 
 }

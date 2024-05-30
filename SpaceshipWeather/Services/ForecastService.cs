@@ -12,12 +12,17 @@ public class ForecastService
     private readonly ILogger<WeatherForecastController> _logger;
     private readonly HttpClient _httpClient;
     private readonly WeatherForcastMapper _weatherForcastMapper;
+    private readonly ForecastRepository _forecastRepository;
 
-    public ForecastService(ILogger<WeatherForecastController> logger, HttpClient httpClient, WeatherForcastMapper weatherForcastMapper)
+    public ForecastService(ILogger<WeatherForecastController> logger,
+                           HttpClient httpClient,
+                           WeatherForcastMapper weatherForcastMapper,
+                           ForecastRepository forecastRepository)
     {
         _logger = logger;
         _httpClient = httpClient;
         _weatherForcastMapper = weatherForcastMapper;
+        _forecastRepository = forecastRepository;
     }
 
     public async Task<WeatherForcast?> GetForcast()
@@ -25,7 +30,9 @@ public class ForecastService
         try
         {
             WeatherForcastDto dto = await FetchForcastsFromExtrnalServiceWithTimeout();
-            return _weatherForcastMapper.MapWeatherForcastDtoToWeatherForcast(dto);
+            WeatherForcast weatherForcast = _weatherForcastMapper.MapWeatherForcastDtoToWeatherForcast(dto);
+            await _forecastRepository.Insert(weatherForcast);
+            return weatherForcast;
         }
         catch (TaskCanceledException)
         {

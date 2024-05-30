@@ -15,6 +15,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<ForecastService>();
 builder.Services.AddSingleton<WeatherForcastMapper>();
 builder.Services.AddSingleton<DatabaseInitilizer>();
+builder.Services.AddSingleton<ForecastRepository>();
 
 builder.Services.AddHttpClient<ForecastService>(client =>
 {
@@ -36,6 +37,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-await app.Services.GetRequiredService<DatabaseInitilizer>().SetupTables();
+await app.Services.GetRequiredService<DatabaseInitilizer>().Setup();
 
 app.Run();
