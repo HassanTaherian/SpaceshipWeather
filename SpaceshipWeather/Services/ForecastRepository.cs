@@ -95,24 +95,11 @@ public class ForecastRepository
         using SqlConnection connection = new(connectionString);
         await connection.OpenAsync();
 
-        WeatherForecast? forecast = await FetchMostRecentWeatherForecast(connection);
-
-        if (forecast is null)
-        {
-            return null;
-        }
-
-        IEnumerable<WeatherSnapshot> snapshots = await FetchRelatedSnapshots(connection, forecast.WeatherForecastId);
-
-        forecast.Snapshots = snapshots;
-
-        return forecast;
-    }
-
-    private static async Task<WeatherForecast?> FetchMostRecentWeatherForecast(IDbConnection connection)
-    {
         const string selectMostRecentForecastQuery = @"
-                SELECT WeatherForecastId,
+                SELECT [TimeStamp],
+                       Temperature,
+                       RelativeHumidity,
+                       WindSpeed,
                        Timezone,
                        TimezoneAbbreviation,
                        Elevation,
@@ -120,41 +107,38 @@ public class ForecastRepository
                        MetricsTemperature AS Temperature,
                        MetricsRelativeHumidity AS RelativeHumidity,
                        MetricsWindSpeed AS WindSpeed
-                FROM WeatherForecast
-                WHERE CreatedAt = (
-                    SELECT MAX(CreatedAt)
-                    FROM WeatherForecast
-                );
-        ";
-
-        WeatherForecast? forecast = (await connection.QueryAsync<WeatherForecast, Metrics, WeatherForecast>(selectMostRecentForecastQuery,
-                                                (forecast, metrics) =>
-                                                {
-                                                    forecast.Metrics = metrics;
-                                                    return forecast;
-                                                },
-                                                splitOn: "Time")).FirstOrDefault();
-        return forecast;
-    }
-
-    private static async Task<IEnumerable<WeatherSnapshot>> FetchRelatedSnapshots(IDbConnection connection, long forecastId)
-    {
-        const string selectRelatedSnapshotsQuery = @"
-                SELECT TimeStamp,
-                       Temperature,
-                       RelativeHumidity,
-                       WindSpeed
                 FROM WeatherSnapshot
-                WHERE WeatherForecastId = @WeatherForecastId
+                INNER JOIN (SELECT WeatherForecastId,
+				                    Timezone,
+				                    TimezoneAbbreviation,
+				                    Elevation,
+				                    MetricsTime,
+				                    MetricsTemperature,
+				                    MetricsRelativeHumidity,
+				                    MetricsWindSpeed
+			                FROM WeatherForecast
+			                WHERE CreatedAt = (
+				                SELECT MAX(CreatedAt)
+				                FROM WeatherForecast
+			                )) AS WeatherForecast ON WeatherForecast.WeatherForecastId = WeatherSnapshot.WeatherForecastId;
         ";
 
-        IEnumerable<WeatherSnapshot> snapshots = await connection.QueryAsync<WeatherSnapshot>(selectRelatedSnapshotsQuery, new
-        {
-            WeatherForecastId = forecastId
-        });
+        WeatherForecast? result = null;
 
-        return snapshots;
+        await connection.QueryAsync<WeatherSnapshot, WeatherForecast, Metrics, WeatherForecast>(selectMostRecentForecastQuery,
+                                    (snapshot, forecast, metrics) =>
+                                    {
+                                        result ??= forecast;
+                                        result.Snapshots ??= [];
+
+                                        result.Snapshots.Add(snapshot);
+                                        result.Metrics ??= metrics;
+                                        return forecast;
+                                    },
+                                    splitOn: "TimeZone,Time");
+        return result;
     }
+
 
     public async Task<bool> DeleteOutdatedForecasts()
     {
