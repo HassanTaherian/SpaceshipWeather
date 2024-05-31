@@ -30,11 +30,11 @@ public class InsertSnapshotBatchtoDatabaseService : BackgroundService
 
             if (isSuccessful)
             {
-                _logger.LogError("Inserting forecasts transaction failed!");
+                _logger.LogInformation("Forecast was added to database!");
             }
             else
             {
-                _logger.LogInformation("Forecast was added to database!");
+                _logger.LogError("Inserting forecasts transaction failed!");
             }
         }
     }
