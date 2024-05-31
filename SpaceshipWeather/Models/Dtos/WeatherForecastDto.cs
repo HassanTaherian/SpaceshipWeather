@@ -2,7 +2,7 @@
 
 using System.Text.Json.Serialization;
 
-public class WeatherForcastDto
+public class WeatherForecastDto
 {
     [JsonPropertyName("timezone")]
     public required string Timezone { get; set; }

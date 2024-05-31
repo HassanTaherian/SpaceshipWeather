@@ -16,7 +16,7 @@ builder.Services.AddSwaggerGen();
 
 // Register Services
 builder.Services.AddScoped<ForecastService>();
-builder.Services.AddSingleton<WeatherForcastMapper>();
+builder.Services.AddSingleton<WeatherForecastMapper>();
 builder.Services.AddSingleton<DatabaseInitilizer>();
 builder.Services.AddSingleton<ForecastRepository>();
 

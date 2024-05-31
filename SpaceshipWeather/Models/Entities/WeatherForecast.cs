@@ -1,6 +1,6 @@
 ﻿namespace SpaceshipWeather.Models.Entities;
 
-public class WeatherForcast
+public class WeatherForecast
 {
     public long WeatherForecastId { get; set; }
 

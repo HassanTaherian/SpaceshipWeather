@@ -3,9 +3,9 @@ using SpaceshipWeather.Models.Entities;
 
 namespace SpaceshipWeather.Models;
 
-public class WeatherForcastMapper
+public class WeatherForecastMapper
 {
-    public WeatherForcast MapWeatherForcastDtoToWeatherForcast(WeatherForcastDto dto)
+    public WeatherForecast MapWeatherForecastDtoToWeatherForecast(WeatherForecastDto dto)
     {
         List<WeatherSanpshot> snapshots = [];
 
@@ -20,7 +20,7 @@ public class WeatherForcastMapper
             });
         }
 
-        return new WeatherForcast()
+        return new WeatherForecast()
         {
             Metrics = new Metrics()
             {

@@ -11,32 +11,32 @@ public class ForecastService
     private readonly JsonSerializerOptions _jsonSerializerOptions = new() { PropertyNameCaseInsensitive = true };
     private readonly ILogger<WeatherForecastController> _logger;
     private readonly HttpClient _httpClient;
-    private readonly WeatherForcastMapper _weatherForcastMapper;
+    private readonly WeatherForecastMapper _weatherForecastMapper;
     private readonly ForecastRepository _forecastRepository;
 
     public ForecastService(ILogger<WeatherForecastController> logger,
                            HttpClient httpClient,
-                           WeatherForcastMapper weatherForcastMapper,
+                           WeatherForecastMapper weatherForecastMapper,
                            ForecastRepository forecastRepository)
     {
         _logger = logger;
         _httpClient = httpClient;
-        _weatherForcastMapper = weatherForcastMapper;
+        _weatherForecastMapper = weatherForecastMapper;
         _forecastRepository = forecastRepository;
     }
 
-    public async Task<WeatherForcast?> GetForcast()
+    public async Task<WeatherForecast?> GetForecast()
     {
         try
         {
-            WeatherForcastDto dto = await FetchForcastsFromExtrnalServiceWithTimeout();
-            WeatherForcast weatherForcast = _weatherForcastMapper.MapWeatherForcastDtoToWeatherForcast(dto);
-            await _forecastRepository.Insert(weatherForcast);
-            return weatherForcast;
+            WeatherForecastDto dto = await FetchForecastsFromExtrnalServiceWithTimeout();
+            WeatherForecast weatherForecast = _weatherForecastMapper.MapWeatherForecastDtoToWeatherForecast(dto);
+            await _forecastRepository.Insert(weatherForecast);
+            return weatherForecast;
         }
         catch (TaskCanceledException)
         {
-            return await _forecastRepository.FetchLastForcast();
+            return await _forecastRepository.FetchLastForecast();
         }
         catch (Exception e)
         {
@@ -49,7 +49,7 @@ public class ForecastService
         }
     }
 
-    private async Task<WeatherForcastDto> FetchForcastsFromExtrnalServiceWithTimeout()
+    private async Task<WeatherForecastDto> FetchForecastsFromExtrnalServiceWithTimeout()
     {
         using var cancellationTokenSource = new CancellationTokenSource(ApplicationSettings.DefaultTimeout);
 
@@ -61,9 +61,9 @@ public class ForecastService
         responseMessage.EnsureSuccessStatusCode();
         Stream responseBody = await responseMessage.Content.ReadAsStreamAsync();
 
-        return (await JsonSerializer.DeserializeAsync<WeatherForcastDto>(responseBody, _jsonSerializerOptions))!;
+        return (await JsonSerializer.DeserializeAsync<WeatherForecastDto>(responseBody, _jsonSerializerOptions))!;
     }
 
 
-    private async Task<WeatherForcast> FetchLastForcastsFromDatabase() => throw new NotImplementedException();
+    private async Task<WeatherForecast> FetchLastForcastsFromDatabase() => throw new NotImplementedException();
 }

@@ -14,16 +14,16 @@ public class WeatherForecastController : ControllerBase
         _forecastService = forecastService;
     }
 
-    [HttpGet("forcasts")]
-    public async Task<IActionResult> GetWeatherForcasts()
+    [HttpGet("forecasts")]
+    public async Task<IActionResult> GetWeatherForecasts()
     {
-        WeatherForcast? forcastDto = await _forecastService.GetForcast();
+        WeatherForecast? forecastDto = await _forecastService.GetForecast();
 
-        if (forcastDto is null)
+        if (forecastDto is null)
         {
             return NotFound("Haven't found any forecast!");
         }
 
-        return Ok(forcastDto);
+        return Ok(forecastDto);
     }
 }

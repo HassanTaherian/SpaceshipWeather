@@ -9,7 +9,7 @@ namespace SpaceshipWeather.Services;
 
 public class ForecastRepository
 {
-    public async Task<bool> Insert(WeatherForcast weatherForecast)
+    public async Task<bool> Insert(WeatherForecast weatherForecast)
     {
         using IDbConnection connection = new SqlConnection(ApplicationSettings.ConnectionString);
         connection.Open();
@@ -17,7 +17,7 @@ public class ForecastRepository
 
         try
         {
-            long forecastId = await InsertWeatherForcast(weatherForecast, connection, transaction);
+            long forecastId = await InsertWeatherForecast(weatherForecast, connection, transaction);
 
             await InsertSnapshots(weatherForecast.Snapshots, connection, transaction, forecastId);
 
@@ -31,7 +31,7 @@ public class ForecastRepository
         }
     }
 
-    private static async Task<long> InsertWeatherForcast(WeatherForcast weatherForecast, IDbConnection connection, IDbTransaction transaction)
+    private static async Task<long> InsertWeatherForecast(WeatherForecast weatherForecast, IDbConnection connection, IDbTransaction transaction)
     {
         const string insertForecastCommand = @"
                 INSERT INTO WeatherForecast (Timezone, TimezoneAbbreviation, Elevation, MetricsTime, MetricsTemperature,
@@ -80,12 +80,12 @@ public class ForecastRepository
         return dataTable;
     }
 
-    public async Task<WeatherForcast?> FetchLastForcast()
+    public async Task<WeatherForecast?> FetchLastForecast()
     {
         using SqlConnection connection = new(ApplicationSettings.ConnectionString);
         connection.Open();
 
-        WeatherForcast? forecast = await FetchMostRecentWeatherForecast(connection);
+        WeatherForecast? forecast = await FetchMostRecentWeatherForecast(connection);
 
         if (forecast is null)
         {
@@ -99,7 +99,7 @@ public class ForecastRepository
         return forecast;
     }
 
-    private static async Task<WeatherForcast?> FetchMostRecentWeatherForecast(IDbConnection connection)
+    private static async Task<WeatherForecast?> FetchMostRecentWeatherForecast(IDbConnection connection)
     {
         const string selectMostRecentForecastQuery = @"
                 SELECT WeatherForecastId,
@@ -117,7 +117,7 @@ public class ForecastRepository
                 );
         ";
 
-        WeatherForcast? forecast = (await connection.QueryAsync<WeatherForcast, Metrics, WeatherForcast>(selectMostRecentForecastQuery,
+        WeatherForecast? forecast = (await connection.QueryAsync<WeatherForecast, Metrics, WeatherForecast>(selectMostRecentForecastQuery,
                                                 (forecast, metrics) =>
                                                 {
                                                     forecast.Metrics = metrics;
