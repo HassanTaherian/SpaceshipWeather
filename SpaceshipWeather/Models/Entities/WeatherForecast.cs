@@ -1,7 +1,10 @@
-﻿namespace SpaceshipWeather.Models.Entities;
+﻿using System.Text.Json.Serialization;
+
+namespace SpaceshipWeather.Models.Entities;
 
 public class WeatherForecast
 {
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public long WeatherForecastId { get; set; }
 
     public required string Timezone { get; set; }

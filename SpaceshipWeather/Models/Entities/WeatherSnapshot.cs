@@ -1,7 +1,10 @@
-﻿namespace SpaceshipWeather.Models.Entities;
+﻿using System.Text.Json.Serialization;
+
+namespace SpaceshipWeather.Models.Entities;
 
 public class WeatherSnapshot
 {
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public long WeatherForecastId { get; set; }
 
     public DateTime TimeStamp { get; set; }
