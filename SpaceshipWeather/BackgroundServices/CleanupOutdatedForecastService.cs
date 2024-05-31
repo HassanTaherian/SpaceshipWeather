@@ -18,8 +18,17 @@ public class CleanupOutdatedForecastService : BackgroundService
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            await _forecastRepository.DeleteOutdatedForecasts();
-            _logger.LogInformation("Outdated WeatherForecast and WeatherSnapshots were removed from database!");
+            bool isSuccessful = await _forecastRepository.DeleteOutdatedForecasts();
+
+            if (isSuccessful)
+            {
+                _logger.LogError("Cleaning up outdated Transaction forecasts failed!");
+            }
+            else
+            {
+                _logger.LogInformation("Outdated WeatherForecast and WeatherSnapshots were removed from database!");
+            }
+
             await Task.Delay(ApplicationSettings.DatabaseCleanupInterval, stoppingToken);
         }
     }

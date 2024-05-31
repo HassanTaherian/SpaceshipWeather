@@ -9,12 +9,15 @@ public class InsertSnapshotBatchtoDatabaseService : BackgroundService
 {
     public readonly ChannelReader<WeatherForecast> _channelReader;
     private readonly ForecastRepository _forecastRepository;
+    private readonly ILogger<InsertSnapshotBatchtoDatabaseService> _logger;
 
     public InsertSnapshotBatchtoDatabaseService(ChannelReader<WeatherForecast> channelReader,
-                                                ForecastRepository forecastRepository)
+                                                ForecastRepository forecastRepository,
+                                                ILogger<InsertSnapshotBatchtoDatabaseService> logger)
     {
         _channelReader = channelReader;
         _forecastRepository = forecastRepository;
+        _logger = logger;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -23,7 +26,16 @@ public class InsertSnapshotBatchtoDatabaseService : BackgroundService
         {
             WeatherForecast weatherForecast = await _channelReader.ReadAsync(stoppingToken);
 
-            await _forecastRepository.Insert(weatherForecast);
+            bool isSuccessful = await _forecastRepository.Insert(weatherForecast);
+
+            if (isSuccessful)
+            {
+                _logger.LogError("Inserting forecasts transaction failed!");
+            }
+            else
+            {
+                _logger.LogInformation("Forecast was added to database!");
+            }
         }
     }
 }
