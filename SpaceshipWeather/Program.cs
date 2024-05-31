@@ -20,7 +20,7 @@ builder.Services.AddScoped<ForecastService>();
 builder.Services.AddSingleton<WeatherForecastMapper>();
 builder.Services.AddSingleton<DatabaseInitilizer>();
 builder.Services.AddSingleton<ForecastRepository>();
-builder.Services.AddHostedService<DatabaseCleanupService>();
+builder.Services.AddHostedService<CleanupOutdatedForecastService>();
 builder.Services.AddHostedService<InsertSnapshotBatchtoDatabaseService>();
 builder.Services.AddSingleton(Channel.CreateUnbounded<WeatherForecast>(new UnboundedChannelOptions() { SingleReader = true }));
 builder.Services.AddSingleton(services => services.GetRequiredService<Channel<WeatherForecast>>().Reader);

@@ -3,12 +3,14 @@ using SpaceshipWeather.Services;
 
 namespace SpaceshipWeather.BackgroundServices;
 
-public class DatabaseCleanupService : BackgroundService
+public class CleanupOutdatedForecastService : BackgroundService
 {
+    private readonly ILogger<CleanupOutdatedForecastService> _logger;
     private readonly ForecastRepository _forecastRepository;
 
-    public DatabaseCleanupService(ForecastRepository forecastRepository)
+    public CleanupOutdatedForecastService(ILogger<CleanupOutdatedForecastService> logger, ForecastRepository forecastRepository)
     {
+        _logger = logger;
         _forecastRepository = forecastRepository;
     }
 
@@ -16,8 +18,8 @@ public class DatabaseCleanupService : BackgroundService
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            await Console.Out.WriteLineAsync("Clean up started");
             await _forecastRepository.DeleteOutdatedForecasts();
+            _logger.LogInformation("Outdated WeatherForecast and WeatherSnapshots were removed from database!");
             await Task.Delay(ApplicationSettings.DatabaseCleanupInterval, stoppingToken);
         }
     }
