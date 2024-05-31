@@ -9,4 +9,7 @@ public static class ApplicationSettings
     public const string DatabaseName = "SpaceshipWeather";
 
     public const string ConnectionString = $"Server=.;Database={DatabaseName};Integrated Security=True;TrustServerCertificate=True;";
+
+    public static readonly TimeSpan DatabaseCleanupInterval = TimeSpan.FromHours(1);
+
 }

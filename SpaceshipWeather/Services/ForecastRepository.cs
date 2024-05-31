@@ -182,20 +182,20 @@ public class ForecastRepository
                 );
             ";
 
-        await connection.ExecuteAsync(deleteOutdatedSnapshotsCommand, transaction);
+        await connection.ExecuteAsync(deleteOutdatedSnapshotsCommand, transaction: transaction);
     }
 
     private static async Task DeleteOutDatedWeatherForecastRecords(IDbConnection connection, IDbTransaction transaction)
     {
         const string deleteOutdatedForecastsCommand = @"
                 DELETE FROM WeatherForecast
-                WHERE CreateAt <> (
-                    SELECT Max(CreateAt)
+                WHERE CreatedAt <> (
+                    SELECT Max(CreatedAt)
                     FROM WeatherForecast
                 );
             ";
 
-        await connection.ExecuteAsync(deleteOutdatedForecastsCommand, transaction);
+        await connection.ExecuteAsync(deleteOutdatedForecastsCommand, transaction: transaction);
     }
 
 }

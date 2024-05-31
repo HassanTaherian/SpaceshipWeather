@@ -1,5 +1,6 @@
 
 using SpaceshipWeather;
+using SpaceshipWeather.BackgroundServices;
 using SpaceshipWeather.Models;
 using SpaceshipWeather.Services;
 using System.Text.Json.Serialization;
@@ -19,6 +20,7 @@ builder.Services.AddScoped<ForecastService>();
 builder.Services.AddSingleton<WeatherForecastMapper>();
 builder.Services.AddSingleton<DatabaseInitilizer>();
 builder.Services.AddSingleton<ForecastRepository>();
+builder.Services.AddHostedService<DatabaseCleanupService>();
 
 builder.Services.AddHttpClient<ForecastService>(client =>
 {
