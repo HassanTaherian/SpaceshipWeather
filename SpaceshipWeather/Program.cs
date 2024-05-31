@@ -1,9 +1,9 @@
-
 using SpaceshipWeather;
 using SpaceshipWeather.BackgroundServices;
 using SpaceshipWeather.Models;
+using SpaceshipWeather.Models.Entities;
 using SpaceshipWeather.Services;
-using System.Text.Json.Serialization;
+using System.Threading.Channels;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +21,10 @@ builder.Services.AddSingleton<WeatherForecastMapper>();
 builder.Services.AddSingleton<DatabaseInitilizer>();
 builder.Services.AddSingleton<ForecastRepository>();
 builder.Services.AddHostedService<DatabaseCleanupService>();
+builder.Services.AddHostedService<InsertSnapshotBatchtoDatabaseService>();
+builder.Services.AddSingleton(Channel.CreateUnbounded<WeatherForecast>(new UnboundedChannelOptions() { SingleReader = true }));
+builder.Services.AddSingleton(services => services.GetRequiredService<Channel<WeatherForecast>>().Reader);
+builder.Services.AddSingleton(services => services.GetRequiredService<Channel<WeatherForecast>>().Writer);
 
 builder.Services.AddHttpClient<ForecastService>(client =>
 {

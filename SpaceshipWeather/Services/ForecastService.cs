@@ -3,6 +3,7 @@ using SpaceshipWeather.Models;
 using SpaceshipWeather.Models.Dtos;
 using SpaceshipWeather.Models.Entities;
 using System.Text.Json;
+using System.Threading.Channels;
 
 namespace SpaceshipWeather.Services;
 
@@ -13,16 +14,19 @@ public class ForecastService
     private readonly HttpClient _httpClient;
     private readonly WeatherForecastMapper _weatherForecastMapper;
     private readonly ForecastRepository _forecastRepository;
+    private readonly ChannelWriter<WeatherForecast> _forecastChannelWritter;
 
     public ForecastService(ILogger<WeatherForecastController> logger,
                            HttpClient httpClient,
                            WeatherForecastMapper weatherForecastMapper,
-                           ForecastRepository forecastRepository)
+                           ForecastRepository forecastRepository,
+                           ChannelWriter<WeatherForecast> forecastChannelWritter)
     {
         _logger = logger;
         _httpClient = httpClient;
         _weatherForecastMapper = weatherForecastMapper;
         _forecastRepository = forecastRepository;
+        _forecastChannelWritter = forecastChannelWritter;
     }
 
     public async Task<WeatherForecast?> GetForecast()
@@ -31,7 +35,7 @@ public class ForecastService
         {
             WeatherForecastDto dto = await FetchForecastsFromExtrnalServiceWithTimeout();
             WeatherForecast weatherForecast = _weatherForecastMapper.MapWeatherForecastDtoToWeatherForecast(dto);
-            await _forecastRepository.Insert(weatherForecast);
+            await _forecastChannelWritter.WriteAsync(weatherForecast);
             return weatherForecast;
         }
         catch (TaskCanceledException)
