@@ -2,6 +2,8 @@
 
 public class WeatherForcast
 {
+    public long WeatherForecastId { get; set; }
+
     public required string Timezone { get; set; }
 
     public required string TimezoneAbbreviation { get; set; }

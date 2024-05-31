@@ -36,7 +36,7 @@ public class ForecastService
         }
         catch (TaskCanceledException)
         {
-            return await FetchLastForcastsFromDatabase();
+            return await _forecastRepository.FetchLastForcast();
         }
         catch (Exception e)
         {

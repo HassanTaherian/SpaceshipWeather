@@ -79,4 +79,70 @@ public class ForecastRepository
 
         return dataTable;
     }
+
+    public async Task<WeatherForcast?> FetchLastForcast()
+    {
+        using SqlConnection connection = new(ApplicationSettings.ConnectionString);
+        connection.Open();
+
+        WeatherForcast? forecast = await FetchMostRecentWeatherForecast(connection);
+
+        if (forecast is null)
+        {
+            return null;
+        }
+
+        IEnumerable<WeatherSanpshot> snapshots = await FetchRelatedSnapshots(connection, forecast.WeatherForecastId);
+
+        forecast.Snapshots = snapshots;
+
+        return forecast;
+    }
+
+    private static async Task<WeatherForcast?> FetchMostRecentWeatherForecast(IDbConnection connection)
+    {
+        const string selectMostRecentForecastQuery = @"
+                SELECT WeatherForecastId,
+                       Timezone,
+                       TimezoneAbbreviation,
+                       Elevation,
+                       MetricsTime AS Time,
+                       MetricsTemperature AS Temperature,
+                       MetricsRelativeHumidity AS RelativeHumidity,
+                       MetricsWindSpeed AS WindSpeed
+                FROM WeatherForecast
+                WHERE CreatedAt = (
+                    SELECT MAX(CreatedAt)
+                    FROM WeatherForecast
+                );
+        ";
+
+        WeatherForcast? forecast = (await connection.QueryAsync<WeatherForcast, Metrics, WeatherForcast>(selectMostRecentForecastQuery,
+                                                (forecast, metrics) =>
+                                                {
+                                                    forecast.Metrics = metrics;
+                                                    return forecast;
+                                                },
+                                                splitOn: "Time")).FirstOrDefault();
+        return forecast;
+    }
+
+    private static async Task<IEnumerable<WeatherSanpshot>> FetchRelatedSnapshots(IDbConnection connection, long forecastId)
+    {
+        const string selectRelatedSnapshotsQuery = @"
+                SELECT TimeStamp,
+                       Temperature,
+                       RelativeHumidity,
+                       WindSpeed
+                FROM WeatherSnapshot
+                WHERE WeatherForecastId = @WeatherForecastId
+        ";
+
+        IEnumerable<WeatherSanpshot> snapshots = await connection.QueryAsync<WeatherSanpshot>(selectRelatedSnapshotsQuery, new
+        {
+            WeatherForecastId = forecastId
+        });
+
+        return snapshots;
+    }
 }

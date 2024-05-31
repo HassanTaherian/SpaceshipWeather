@@ -21,13 +21,9 @@ public class WeatherForecastController : ControllerBase
 
         if (forcastDto is null)
         {
-            return GetInternalErrorResult();
+            return NotFound("Haven't found any forecast!");
         }
 
         return Ok(forcastDto);
     }
-
-    private ObjectResult GetInternalErrorResult() => StatusCode(500, new
-    { Message = "Something went Wrong! Please refer to logs." });
-
 }

@@ -59,9 +59,9 @@ public class DatabaseInitilizer
                     Temperature DECIMAL(10,2) NOT NULL,
                     RelativeHumidity INT NOT NULL,
                     WindSpeed DECIMAL(10,2) NOT NULL,
-                    WeatherForecastRef BIGINT NOT NULL,
-                    CONSTRAINT WeatherForecast_WeatherForecastRef_FK 
-                    FOREIGN KEY(WeatherForecastRef) REFERENCES WeatherForecast(WeatherForecastId)
+                    WeatherForecastId BIGINT NOT NULL,
+                    CONSTRAINT WeatherForecast_WeatherForecastId_FK 
+                    FOREIGN KEY(WeatherForecastId) REFERENCES WeatherForecast(WeatherForecastId)
                 );
                 END
         ";
@@ -82,7 +82,7 @@ public class DatabaseInitilizer
                         Temperature DECIMAL(10,2) NOT NULL,
                         RelativeHumidity INT NOT NULL,
                         WindSpeed DECIMAL(10,2) NOT NULL,
-                        WeatherForecastRef BIGINT NOT NULL
+                        WeatherForecastId BIGINT NOT NULL
                     );
                 END
         ";
@@ -98,11 +98,11 @@ public class DatabaseInitilizer
                 BEGIN
                     EXEC('
                     CREATE PROCEDURE sp_InsertSnapshotBatch 
-                        @Snapshots dbo.WeatherSnapshotTable READONLY
+                        @Snapshots dbo.WeatherSanpshotBatchTable READONLY
                     AS
                     BEGIN
-                        INSERT INTO WeatherSnapshot ([TimeStamp], Temperature, RelativeHumidity, WindSpeed, WeatherForecastRef)
-                        SELECT [TimeStamp], Temperature, RelativeHumidity, WindSpeed, WeatherForecastRef 
+                        INSERT INTO WeatherSnapshot ([TimeStamp], Temperature, RelativeHumidity, WindSpeed, WeatherForecastId)
+                        SELECT [TimeStamp], Temperature, RelativeHumidity, WindSpeed, WeatherForecastId 
                         FROM @Snapshots;
                     END')
                 END
