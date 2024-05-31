@@ -145,4 +145,57 @@ public class ForecastRepository
 
         return snapshots;
     }
+
+    public async Task<bool> DeleteOutdatedForecasts()
+    {
+        using IDbConnection connection = new SqlConnection(ApplicationSettings.ConnectionString);
+        connection.Open();
+        using var transaction = connection.BeginTransaction();
+
+        try
+        {
+            await DeleteOutdatedWeatherSnapshotRecords(connection, transaction);
+
+            await DeleteOutDatedWeatherForecastRecords(connection, transaction);
+
+            transaction.Commit();
+            return true;
+        }
+        catch
+        {
+            transaction.Rollback();
+            return false;
+        }
+    }
+
+    private static async Task DeleteOutdatedWeatherSnapshotRecords(IDbConnection connection, IDbTransaction transaction)
+    {
+        const string deleteOutdatedSnapshotsCommand = @"
+                DELETE FROM WeatherSnapshot
+                WHERE WeatherForecastId NOT IN (
+                    SELECT WeatherForecastId
+                    FROM WeatherForecast
+                    WHERE CreatedAt = (
+                        SELECT Max(CreatedAt)
+                        FROM WeatherForecast
+                    )
+                );
+            ";
+
+        await connection.ExecuteAsync(deleteOutdatedSnapshotsCommand, transaction);
+    }
+
+    private static async Task DeleteOutDatedWeatherForecastRecords(IDbConnection connection, IDbTransaction transaction)
+    {
+        const string deleteOutdatedForecastsCommand = @"
+                DELETE FROM WeatherForecast
+                WHERE CreateAt <> (
+                    SELECT Max(CreateAt)
+                    FROM WeatherForecast
+                );
+            ";
+
+        await connection.ExecuteAsync(deleteOutdatedForecastsCommand, transaction);
+    }
+
 }
