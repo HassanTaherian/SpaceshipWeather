@@ -21,7 +21,7 @@ public class DatabaseInitilizer
 
         await CreateWeatherForecastTable(connection);
         await CreateWeatherSnapshotTable(connection);
-        await CreateSanpshotBatchTable(connection);
+        await CreateSnapshotBatchTable(connection);
         await CreateInsertSnapshotBatchStoredProcedure(connection);
     }
 
@@ -71,12 +71,12 @@ public class DatabaseInitilizer
     }
 
 
-    private async Task CreateSanpshotBatchTable(SqlConnection connection)
+    private async Task CreateSnapshotBatchTable(SqlConnection connection)
     {
-        const string createSanpshotBatchTableCommand = @"
-                IF NOT EXISTS (SELECT * FROM sys.types WHERE name = 'WeatherSanpshotBatchTable')
+        const string createSnapshotBatchTableCommand = @"
+                IF NOT EXISTS (SELECT * FROM sys.types WHERE name = 'WeatherSnapshotBatchTable')
                 BEGIN
-                    CREATE TYPE WeatherSanpshotBatchTable AS TABLE
+                    CREATE TYPE WeatherSnapshotBatchTable AS TABLE
                     (
                         TimeStamp DATETIME2 NOT NULL,
                         Temperature DECIMAL(10,2) NOT NULL,
@@ -87,18 +87,18 @@ public class DatabaseInitilizer
                 END
         ";
 
-        await connection.ExecuteAsync(createSanpshotBatchTableCommand);
-        _logger.LogInformation("SanpshotBatchTable type created!");
+        await connection.ExecuteAsync(createSnapshotBatchTableCommand);
+        _logger.LogInformation("SnapshotBatchTable type created!");
     }
 
     public async Task CreateInsertSnapshotBatchStoredProcedure(SqlConnection connection)
     {
-        const string createSanpshotBatchTableCommand = @"
+        const string createSnapshotBatchTableCommand = @"
                 IF NOT EXISTS (SELECT * FROM sys.objects WHERE name = 'sp_InsertSnapshotBatch' AND type = 'P')
                 BEGIN
                     EXEC('
                     CREATE PROCEDURE sp_InsertSnapshotBatch 
-                        @Snapshots dbo.WeatherSanpshotBatchTable READONLY
+                        @Snapshots dbo.WeatherSnapshotBatchTable READONLY
                     AS
                     BEGIN
                         INSERT INTO WeatherSnapshot ([TimeStamp], Temperature, RelativeHumidity, WindSpeed, WeatherForecastId)
@@ -108,7 +108,7 @@ public class DatabaseInitilizer
                 END
         ";
 
-        await connection.ExecuteAsync(createSanpshotBatchTableCommand);
+        await connection.ExecuteAsync(createSnapshotBatchTableCommand);
         _logger.LogInformation("sp_InsertSnapshotBatch stored procedure created!");
     }
 }

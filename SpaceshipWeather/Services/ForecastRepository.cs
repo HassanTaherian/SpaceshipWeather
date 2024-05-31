@@ -53,7 +53,7 @@ public class ForecastRepository
         }, transaction);
     }
 
-    private static async Task InsertSnapshots(IEnumerable<WeatherSanpshot> snapshots, IDbConnection connection,
+    private static async Task InsertSnapshots(IEnumerable<WeatherSnapshot> snapshots, IDbConnection connection,
                                               IDbTransaction transaction, long forecastId)
     {
         DynamicParameters parameters = new();
@@ -62,16 +62,16 @@ public class ForecastRepository
         await connection.ExecuteAsync("sp_InsertSnapshotBatch", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
     }
 
-    private static DataTable ToDataTable(IEnumerable<WeatherSanpshot> sanpshots, long forecastId)
+    private static DataTable ToDataTable(IEnumerable<WeatherSnapshot> snapshots, long forecastId)
     {
         DataTable dataTable = new();
-        dataTable.Columns.Add(nameof(WeatherSanpshot.TimeStamp), typeof(DateTime));
-        dataTable.Columns.Add(nameof(WeatherSanpshot.RelativeHumidity), typeof(int));
-        dataTable.Columns.Add(nameof(WeatherSanpshot.Temperature), typeof(decimal));
-        dataTable.Columns.Add(nameof(WeatherSanpshot.WindSpeed), typeof(decimal));
-        dataTable.Columns.Add(nameof(WeatherSanpshot.WeatherForecastId), typeof(long));
+        dataTable.Columns.Add(nameof(WeatherSnapshot.TimeStamp), typeof(DateTime));
+        dataTable.Columns.Add(nameof(WeatherSnapshot.RelativeHumidity), typeof(int));
+        dataTable.Columns.Add(nameof(WeatherSnapshot.Temperature), typeof(decimal));
+        dataTable.Columns.Add(nameof(WeatherSnapshot.WindSpeed), typeof(decimal));
+        dataTable.Columns.Add(nameof(WeatherSnapshot.WeatherForecastId), typeof(long));
 
-        foreach (WeatherSanpshot snapshot in sanpshots)
+        foreach (WeatherSnapshot snapshot in snapshots)
         {
             dataTable.Rows.Add(snapshot.TimeStamp, snapshot.RelativeHumidity, snapshot.Temperature,
                                snapshot.WindSpeed, forecastId);
@@ -92,7 +92,7 @@ public class ForecastRepository
             return null;
         }
 
-        IEnumerable<WeatherSanpshot> snapshots = await FetchRelatedSnapshots(connection, forecast.WeatherForecastId);
+        IEnumerable<WeatherSnapshot> snapshots = await FetchRelatedSnapshots(connection, forecast.WeatherForecastId);
 
         forecast.Snapshots = snapshots;
 
@@ -127,7 +127,7 @@ public class ForecastRepository
         return forecast;
     }
 
-    private static async Task<IEnumerable<WeatherSanpshot>> FetchRelatedSnapshots(IDbConnection connection, long forecastId)
+    private static async Task<IEnumerable<WeatherSnapshot>> FetchRelatedSnapshots(IDbConnection connection, long forecastId)
     {
         const string selectRelatedSnapshotsQuery = @"
                 SELECT TimeStamp,
@@ -138,7 +138,7 @@ public class ForecastRepository
                 WHERE WeatherForecastId = @WeatherForecastId
         ";
 
-        IEnumerable<WeatherSanpshot> snapshots = await connection.QueryAsync<WeatherSanpshot>(selectRelatedSnapshotsQuery, new
+        IEnumerable<WeatherSnapshot> snapshots = await connection.QueryAsync<WeatherSnapshot>(selectRelatedSnapshotsQuery, new
         {
             WeatherForecastId = forecastId
         });

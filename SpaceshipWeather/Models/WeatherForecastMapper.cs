@@ -7,11 +7,11 @@ public class WeatherForecastMapper
 {
     public WeatherForecast MapWeatherForecastDtoToWeatherForecast(WeatherForecastDto dto)
     {
-        List<WeatherSanpshot> snapshots = [];
+        List<WeatherSnapshot> snapshots = [];
 
         for (int i = 0; i < dto.SnapshotsData.RelativeHumidities.Count; i++)
         {
-            snapshots.Add(new WeatherSanpshot()
+            snapshots.Add(new WeatherSnapshot()
             {
                 TimeStamp = dto.SnapshotsData.TimeStamps[i],
                 RelativeHumidity = dto.SnapshotsData.RelativeHumidities[i],
