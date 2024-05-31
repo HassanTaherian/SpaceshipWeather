@@ -22,11 +22,11 @@ public class CleanupOutdatedForecastService : BackgroundService
 
             if (isSuccessful)
             {
-                _logger.LogError("Cleaning up outdated Transaction forecasts failed!");
+                _logger.LogInformation("Outdated WeatherForecast and WeatherSnapshots were removed from database!");
             }
             else
             {
-                _logger.LogInformation("Outdated WeatherForecast and WeatherSnapshots were removed from database!");
+                _logger.LogError("Cleaning up outdated Transaction forecasts failed!");
             }
 
             await Task.Delay(ApplicationSettings.DatabaseCleanupInterval, stoppingToken);
