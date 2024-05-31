@@ -63,7 +63,4 @@ public class ForecastService
 
         return (await JsonSerializer.DeserializeAsync<WeatherForecastDto>(responseBody, _jsonSerializerOptions))!;
     }
-
-
-    private async Task<WeatherForecast> FetchLastForcastsFromDatabase() => throw new NotImplementedException();
 }
