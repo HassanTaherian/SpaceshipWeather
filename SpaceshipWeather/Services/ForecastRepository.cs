@@ -9,9 +9,17 @@ namespace SpaceshipWeather.Services;
 
 public class ForecastRepository
 {
+    private readonly IConfiguration _configuration;
+
+    public ForecastRepository(IConfiguration configuration)
+    {
+        _configuration = configuration;
+    }
+
     public async Task<bool> Insert(WeatherForecast weatherForecast)
     {
-        using SqlConnection connection = new(ApplicationSettings.ConnectionString);
+        string? connectionString = _configuration.GetConnectionString(ApplicationSettings.ConnectionStringName);
+        using SqlConnection connection = new(connectionString);
         await connection.OpenAsync();
         using var transaction = connection.BeginTransaction();
 
@@ -80,9 +88,11 @@ public class ForecastRepository
         return dataTable;
     }
 
+    // Use transactions or use join
     public async Task<WeatherForecast?> FetchLastForecast()
     {
-        using SqlConnection connection = new(ApplicationSettings.ConnectionString);
+        string? connectionString = _configuration.GetConnectionString(ApplicationSettings.ConnectionStringName);
+        using SqlConnection connection = new(connectionString);
         await connection.OpenAsync();
 
         WeatherForecast? forecast = await FetchMostRecentWeatherForecast(connection);
@@ -148,7 +158,8 @@ public class ForecastRepository
 
     public async Task<bool> DeleteOutdatedForecasts()
     {
-        using SqlConnection connection = new(ApplicationSettings.ConnectionString);
+        string? connectionString = _configuration.GetConnectionString(ApplicationSettings.ConnectionStringName);
+        using SqlConnection connection = new(connectionString);
         await connection.OpenAsync();
         using var transaction = connection.BeginTransaction();
 

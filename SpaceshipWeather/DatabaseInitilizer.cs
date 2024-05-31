@@ -7,15 +7,18 @@ namespace SpaceshipWeather;
 public class DatabaseInitilizer
 {
     private readonly ILogger<DatabaseInitilizer> _logger;
+    private readonly IConfiguration _configuration;
 
-    public DatabaseInitilizer(ILogger<DatabaseInitilizer> logger)
+    public DatabaseInitilizer(ILogger<DatabaseInitilizer> logger, IConfiguration configuration)
     {
         _logger = logger;
+        _configuration = configuration;
     }
 
     public async Task Setup()
     {
-        using SqlConnection connection = new(ApplicationSettings.ConnectionString);
+        string? connectionString = _configuration.GetConnectionString(ApplicationSettings.ConnectionStringName);
+        using SqlConnection connection = new(connectionString);
 
         await connection.OpenAsync();
 
