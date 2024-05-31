@@ -17,7 +17,7 @@ public class DatabaseInitilizer
     {
         using SqlConnection connection = new(ApplicationSettings.ConnectionString);
 
-        connection.Open();
+        await connection.OpenAsync();
 
         await CreateWeatherForecastTable(connection);
         await CreateWeatherSnapshotTable(connection);

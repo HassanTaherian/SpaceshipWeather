@@ -11,8 +11,8 @@ public class ForecastRepository
 {
     public async Task<bool> Insert(WeatherForecast weatherForecast)
     {
-        using IDbConnection connection = new SqlConnection(ApplicationSettings.ConnectionString);
-        connection.Open();
+        using SqlConnection connection = new(ApplicationSettings.ConnectionString);
+        await connection.OpenAsync();
         using var transaction = connection.BeginTransaction();
 
         try
@@ -83,7 +83,7 @@ public class ForecastRepository
     public async Task<WeatherForecast?> FetchLastForecast()
     {
         using SqlConnection connection = new(ApplicationSettings.ConnectionString);
-        connection.Open();
+        await connection.OpenAsync();
 
         WeatherForecast? forecast = await FetchMostRecentWeatherForecast(connection);
 
@@ -148,8 +148,8 @@ public class ForecastRepository
 
     public async Task<bool> DeleteOutdatedForecasts()
     {
-        using IDbConnection connection = new SqlConnection(ApplicationSettings.ConnectionString);
-        connection.Open();
+        using SqlConnection connection = new(ApplicationSettings.ConnectionString);
+        await connection.OpenAsync();
         using var transaction = connection.BeginTransaction();
 
         try
