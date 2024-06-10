@@ -20,8 +20,6 @@ public class DatabaseInitilizer
         string? connectionString = _configuration.GetConnectionString(ApplicationSettings.ConnectionStringName);
         await using SqlConnection connection = new(connectionString);
 
-        await connection.OpenAsync();
-
         await CreateWeatherForecastTable(connection);
         await CreateWeatherSnapshotTable(connection);
         await CreateSnapshotBatchTable(connection);

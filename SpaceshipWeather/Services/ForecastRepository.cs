@@ -93,7 +93,6 @@ public class ForecastRepository
     {
         string? connectionString = _configuration.GetConnectionString(ApplicationSettings.ConnectionStringName);
         await using SqlConnection connection = new(connectionString);
-        await connection.OpenAsync();
 
         const string selectMostRecentForecastQuery = @"
                 SELECT [TimeStamp],
