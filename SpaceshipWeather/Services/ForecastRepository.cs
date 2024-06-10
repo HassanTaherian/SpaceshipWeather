@@ -90,8 +90,7 @@ public class ForecastRepository
 
         return dataTable;
     }
-
-    // Use transactions or use join
+    
     public async Task<WeatherForecast?> FetchLastForecast()
     {
         string? connectionString = _configuration.GetConnectionString(ApplicationSettings.ConnectionStringName);
