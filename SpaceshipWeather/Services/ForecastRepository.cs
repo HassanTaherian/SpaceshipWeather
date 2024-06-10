@@ -39,14 +39,16 @@ public class ForecastRepository
         }
     }
 
-    private static async Task<long> InsertWeatherForecast(WeatherForecast weatherForecast, IDbConnection connection, IDbTransaction transaction)
+    private static async Task<long> InsertWeatherForecast(WeatherForecast weatherForecast, IDbConnection connection,
+        IDbTransaction transaction)
     {
-        const string insertForecastCommand = @"
-                INSERT INTO WeatherForecast (Timezone, TimezoneAbbreviation, Elevation, MetricsTime, MetricsTemperature,
-                                              MetricsRelativeHumidity, MetricsWindSpeed)
-                VALUES (@Timezone, @TimezoneAbbreviation, @Elevation, @MetricsTime, @MetricsTemperature,
-                        @MetricsRelativeHumidity, @MetricsWindSpeed);
-                SELECT CAST(SCOPE_IDENTITY() as BIGINT);";
+        const string insertForecastCommand = """
+                                                 INSERT INTO WeatherForecast (Timezone, TimezoneAbbreviation, Elevation, MetricsTime, MetricsTemperature,
+                                                                              MetricsRelativeHumidity, MetricsWindSpeed)
+                                                 VALUES (@Timezone, @TimezoneAbbreviation, @Elevation, @MetricsTime, @MetricsTemperature, 
+                                                         @MetricsRelativeHumidity, @MetricsWindSpeed);
+                                                 SELECT CAST(SCOPE_IDENTITY() as BIGINT);
+                                             """;
 
 
         return await connection.ExecuteScalarAsync<int>(insertForecastCommand, new
@@ -62,12 +64,13 @@ public class ForecastRepository
     }
 
     private static async Task InsertSnapshots(IEnumerable<WeatherSnapshot> snapshots, IDbConnection connection,
-                                              IDbTransaction transaction, long forecastId)
+        IDbTransaction transaction, long forecastId)
     {
         DynamicParameters parameters = new();
         parameters.Add("@Snapshots", ToDataTable(snapshots, forecastId),
-                        DbType.Object, ParameterDirection.Input);
-        await connection.ExecuteAsync("sp_InsertSnapshotBatch", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
+            DbType.Object, ParameterDirection.Input);
+        await connection.ExecuteAsync("sp_InsertSnapshotBatch", parameters, commandType: CommandType.StoredProcedure,
+            transaction: transaction);
     }
 
     private static DataTable ToDataTable(IEnumerable<WeatherSnapshot> snapshots, long forecastId)
@@ -82,7 +85,7 @@ public class ForecastRepository
         foreach (WeatherSnapshot snapshot in snapshots)
         {
             dataTable.Rows.Add(snapshot.TimeStamp, snapshot.RelativeHumidity, snapshot.Temperature,
-                               snapshot.WindSpeed, forecastId);
+                snapshot.WindSpeed, forecastId);
         }
 
         return dataTable;
@@ -94,47 +97,49 @@ public class ForecastRepository
         string? connectionString = _configuration.GetConnectionString(ApplicationSettings.ConnectionStringName);
         await using SqlConnection connection = new(connectionString);
 
-        const string selectMostRecentForecastQuery = @"
-                SELECT [TimeStamp],
-                       Temperature,
-                       RelativeHumidity,
-                       WindSpeed,
-                       Timezone,
-                       TimezoneAbbreviation,
-                       Elevation,
-                       MetricsTime AS Time,
-                       MetricsTemperature AS Temperature,
-                       MetricsRelativeHumidity AS RelativeHumidity,
-                       MetricsWindSpeed AS WindSpeed
-                FROM WeatherSnapshot
-                INNER JOIN (SELECT WeatherForecastId,
-				                    Timezone,
-				                    TimezoneAbbreviation,
-				                    Elevation,
-				                    MetricsTime,
-				                    MetricsTemperature,
-				                    MetricsRelativeHumidity,
-				                    MetricsWindSpeed
-			                FROM WeatherForecast
-			                WHERE CreatedAt = (
-				                SELECT MAX(CreatedAt)
-				                FROM WeatherForecast
-			                )) AS WeatherForecast ON WeatherForecast.WeatherForecastId = WeatherSnapshot.WeatherForecastId;
-        ";
+        const string selectMostRecentForecastQuery = """
+                                                         SELECT [TimeStamp],
+                                                                "Temperature",
+                                                                RelativeHumidity,
+                                                                WindSpeed,
+                                                                Timezone,
+                                                                TimezoneAbbreviation,
+                                                                Elevation,
+                                                                MetricsTime AS Time,
+                                                                MetricsTemperature AS Temperature,
+                                                                MetricsRelativeHumidity AS RelativeHumidity,
+                                                                MetricsWindSpeed AS WindSpeed
+                                                         FROM WeatherSnapshot
+                                                         INNER JOIN (SELECT WeatherForecastId,
+                                                     				        Timezone,
+                                                     				        TimezoneAbbreviation,
+                                                     				        Elevation,
+                                                     				        MetricsTime,
+                                                     				        MetricsTemperature,
+                                                     				        MetricsRelativeHumidity,
+                                                     				        MetricsWindSpeed
+                                                     			    FROM WeatherForecast
+                                                     			    WHERE CreatedAt = (
+                                                     				    SELECT MAX(CreatedAt)
+                                                     				    FROM WeatherForecast
+                                                     			    )) AS WeatherForecast ON WeatherForecast.WeatherForecastId = WeatherSnapshot.WeatherForecastId;
+                                                             
+                                                     """;
 
         WeatherForecast? result = null;
 
-        await connection.QueryAsync<WeatherSnapshot, WeatherForecast, Metrics, WeatherForecast>(selectMostRecentForecastQuery,
-                                    (snapshot, forecast, metrics) =>
-                                    {
-                                        result ??= forecast;
-                                        result.Snapshots ??= [];
+        await connection.QueryAsync<WeatherSnapshot, WeatherForecast, Metrics, WeatherForecast>(
+            selectMostRecentForecastQuery,
+            (snapshot, forecast, metrics) =>
+            {
+                result ??= forecast;
+                result.Snapshots ??= [];
 
-                                        result.Snapshots.Add(snapshot);
-                                        result.Metrics ??= metrics;
-                                        return forecast;
-                                    },
-                                    splitOn: "TimeZone,Time");
+                result.Snapshots.Add(snapshot);
+                result.Metrics ??= metrics;
+                return forecast;
+            },
+            splitOn: "TimeZone,Time");
         return result;
     }
 
@@ -164,32 +169,31 @@ public class ForecastRepository
 
     private static async Task DeleteOutdatedWeatherSnapshotRecords(IDbConnection connection, IDbTransaction transaction)
     {
-        const string deleteOutdatedSnapshotsCommand = @"
-                DELETE FROM WeatherSnapshot
-                WHERE WeatherForecastId NOT IN (
-                    SELECT WeatherForecastId
-                    FROM WeatherForecast
-                    WHERE CreatedAt = (
-                        SELECT Max(CreatedAt)
-                        FROM WeatherForecast
-                    )
-                );
-            ";
+        const string deleteOutdatedSnapshotsCommand = """
+                                                          DELETE FROM WeatherSnapshot
+                                                          WHERE WeatherForecastId NOT IN (
+                                                              SELECT WeatherForecastId
+                                                              FROM WeatherForecast
+                                                              WHERE CreatedAt = (
+                                                                  SELECT Max(CreatedAt)
+                                                                  FROM WeatherForecast
+                                                              )
+                                                          );
+                                                      """;
 
         await connection.ExecuteAsync(deleteOutdatedSnapshotsCommand, transaction: transaction);
     }
 
     private static async Task DeleteOutDatedWeatherForecastRecords(IDbConnection connection, IDbTransaction transaction)
     {
-        const string deleteOutdatedForecastsCommand = @"
-                DELETE FROM WeatherForecast
-                WHERE CreatedAt <> (
-                    SELECT Max(CreatedAt)
-                    FROM WeatherForecast
-                );
-            ";
+        const string deleteOutdatedForecastsCommand = """
+                                                          DELETE FROM WeatherForecast
+                                                          WHERE CreatedAt <> (
+                                                              SELECT Max(CreatedAt)
+                                                              FROM WeatherForecast
+                                                          );
+                                                      """;
 
         await connection.ExecuteAsync(deleteOutdatedForecastsCommand, transaction: transaction);
     }
-
 }
