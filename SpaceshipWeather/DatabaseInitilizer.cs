@@ -33,13 +33,13 @@ public class DatabaseInitilizer
                                                              BEGIN
                                                              CREATE TABLE WeatherForecast (
                                                                  WeatherForecastId BIGINT NOT NULL IDENTITY(1,1),
-                                                                 Timezone VARCHAR(50) NOT NULL,
+                                                                 Timezone VARCHAR(25) NOT NULL,
                                                                  TimezoneAbbreviation VARCHAR(10) NOT NULL,
-                                                                 Elevation FLOAT NOT NULL,
-                                                                 MetricsTime VARCHAR(25) NOT NULL,
-                                                                 MetricsTemperature VARCHAR(25) NOT NULL,
-                                                                 MetricsRelativeHumidity VARCHAR(25) NOT NULL,
-                                                                 MetricsWindSpeed VARCHAR(25) NOT NULL,
+                                                                 Elevation DECIMAL(10,2) NOT NULL,
+                                                                 MetricsTime VARCHAR(10) NOT NULL,
+                                                                 MetricsTemperature VARCHAR(10) NOT NULL,
+                                                                 MetricsRelativeHumidity VARCHAR(10) NOT NULL,
+                                                                 MetricsWindSpeed VARCHAR(10) NOT NULL,
                                                                  CreatedAt DATETIME2 NOT NULL DEFAULT GETDATE(),
                                                                  PRIMARY KEY (WeatherForecastId)
                                                              );
@@ -57,9 +57,9 @@ public class DatabaseInitilizer
                                                              BEGIN
                                                              CREATE TABLE WeatherSnapshot (
                                                                  TimeStamp DATETIME2 NOT NULL,
-                                                                 Temperature DECIMAL(10,2) NOT NULL,
-                                                                 RelativeHumidity INT NOT NULL,
-                                                                 WindSpeed DECIMAL(10,2) NOT NULL,
+                                                                 Temperature DECIMAL(5,2) NOT NULL,
+                                                                 RelativeHumidity TINYINT NOT NULL,
+                                                                 WindSpeed DECIMAL(5,2) NOT NULL,
                                                                  WeatherForecastId BIGINT NOT NULL,
                                                                  CONSTRAINT WeatherForecast_WeatherForecastId_FK
                                                                  FOREIGN KEY(WeatherForecastId) REFERENCES WeatherForecast(WeatherForecastId)
