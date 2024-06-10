@@ -45,22 +45,34 @@ public class ForecastRepository
         const string insertForecastCommand = """
                                                  INSERT INTO WeatherForecast (Timezone, TimezoneAbbreviation, Elevation, MetricsTime, MetricsTemperature,
                                                                               MetricsRelativeHumidity, MetricsWindSpeed)
-                                                 VALUES (@Timezone, @TimezoneAbbreviation, @Elevation, @MetricsTime, @MetricsTemperature, 
+                                                 VALUES (@Timezone, @TimezoneAbbreviation, @Elevation, @MetricsTime, @MetricsTemperature,
                                                          @MetricsRelativeHumidity, @MetricsWindSpeed);
                                                  SELECT CAST(SCOPE_IDENTITY() as BIGINT);
                                              """;
 
 
-        return await connection.ExecuteScalarAsync<int>(insertForecastCommand, new
-        {
-            weatherForecast.Timezone,
-            weatherForecast.TimezoneAbbreviation,
-            weatherForecast.Elevation,
-            MetricsTime = weatherForecast.Metrics.Time,
-            MetricsTemperature = weatherForecast.Metrics.Temperature,
-            MetricsRelativeHumidity = weatherForecast.Metrics.RelativeHumidity,
-            MetricsWindSpeed = weatherForecast.Metrics.WindSpeed
-        }, transaction);
+        var parameters = CreateParametersFromWeatherForecast(weatherForecast);
+
+
+        return await connection.ExecuteScalarAsync<int>(insertForecastCommand,
+            CreateParametersFromWeatherForecast(weatherForecast), transaction);
+    }
+
+    private static DynamicParameters CreateParametersFromWeatherForecast(WeatherForecast weatherForecast)
+    {
+        DynamicParameters parameters = new();
+        parameters.Add("@Timezone", weatherForecast.Timezone, DbType.String, ParameterDirection.Input, 25);
+        parameters.Add("@TimezoneAbbreviation", weatherForecast.TimezoneAbbreviation, DbType.String,
+            ParameterDirection.Input, 10);
+        parameters.Add("@Elevation", weatherForecast.Elevation, DbType.Decimal, ParameterDirection.Input, null, 10, 2);
+        parameters.Add("@MetricsTime", weatherForecast.Metrics.Time, DbType.String, ParameterDirection.Input, 10);
+        parameters.Add("@MetricsTemperature", weatherForecast.Metrics.Temperature, DbType.String,
+            ParameterDirection.Input, 10);
+        parameters.Add("@MetricsRelativeHumidity", weatherForecast.Metrics.RelativeHumidity, DbType.String,
+            ParameterDirection.Input, 10);
+        parameters.Add("@MetricsWindSpeed", weatherForecast.Metrics.WindSpeed, DbType.String, ParameterDirection.Input,
+            10);
+        return parameters;
     }
 
     private static async Task InsertSnapshots(IEnumerable<WeatherSnapshot> snapshots, IDbConnection connection,
@@ -90,7 +102,7 @@ public class ForecastRepository
 
         return dataTable;
     }
-    
+
     public async Task<WeatherForecast?> FetchLastForecast()
     {
         string? connectionString = _configuration.GetConnectionString(ApplicationSettings.ConnectionStringName);
