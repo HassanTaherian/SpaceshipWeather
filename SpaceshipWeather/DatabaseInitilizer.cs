@@ -18,7 +18,7 @@ public class DatabaseInitilizer
     public async Task Setup()
     {
         string? connectionString = _configuration.GetConnectionString(ApplicationSettings.ConnectionStringName);
-        using SqlConnection connection = new(connectionString);
+        await using SqlConnection connection = new(connectionString);
 
         await connection.OpenAsync();
 
