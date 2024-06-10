@@ -29,12 +29,12 @@ public class ForecastRepository
 
             await InsertSnapshots(weatherForecast.Snapshots, connection, transaction, forecastId);
 
-            transaction.Commit();
+            await transaction.CommitAsync();
             return true;
         }
         catch
         {
-            transaction.Rollback();
+            await transaction.RollbackAsync();
             return false;
         }
     }
@@ -153,12 +153,12 @@ public class ForecastRepository
 
             await DeleteOutDatedWeatherForecastRecords(connection, transaction);
 
-            transaction.Commit();
+            await transaction.CommitAsync();
             return true;
         }
         catch
         {
-            transaction.Rollback();
+            await transaction.RollbackAsync();
             return false;
         }
     }
